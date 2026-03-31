@@ -55,19 +55,21 @@ Generate a QR code pointing to your server's public URL (e.g., `https://vote.you
 
 ## Pages
 
-| URL | Description |
-|-----|-------------|
-| `/` | Voting page (share this via QR code) |
-| `/results` | Live results with real-time updates |
-| `/admin` | Admin dashboard (password-protected) |
+| URL        | Description                          |
+| ---------- | ------------------------------------ |
+| `/`        | Voting page (share this via QR code) |
+| `/results` | Live results with real-time updates  |
+| `/admin`   | Admin dashboard (password-protected) |
 
 ## Admin
 
 Access `/admin` with:
+
 - **Username:** `admin`
 - **Password:** value from `config.yaml` or `ADMIN_PASSWORD` env var
 
 From the admin dashboard you can:
+
 - View vote counts and percentages
 - Run the prize draw (picks a random voter who left contact details)
 - Clear all votes and draw results
@@ -99,12 +101,12 @@ sqlc generate
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CONFIG_PATH` | `config.yaml` | Path to the configuration file |
-| `DB_PATH` | `data/votes.db` | Path to the SQLite database file |
-| `ADMIN_PASSWORD` | _(from config)_ | Override admin password |
-| `GIN_MODE` | `debug` | Set to `release` for production |
+| Variable         | Default         | Description                      |
+| ---------------- | --------------- | -------------------------------- |
+| `CONFIG_PATH`    | `config.yaml`   | Path to the configuration file   |
+| `DB_PATH`        | `data/votes.db` | Path to the SQLite database file |
+| `ADMIN_PASSWORD` | _(from config)_ | Override admin password          |
+| `GIN_MODE`       | `debug`         | Set to `release` for production  |
 
 ## Deployment on Hetzner
 

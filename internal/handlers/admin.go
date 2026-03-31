@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"context"
+	"crypto/rand"
 	"crypto/subtle"
 	"database/sql"
 	"log"
-	"math/rand"
+	"math/big"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -166,7 +166,13 @@ func (h *AdminHandler) RunDraw(c *gin.Context) {
 	}
 
 	// Pick a random winner
-	winner := voters[rand.Intn(len(voters))]
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(voters))))
+	if err != nil {
+		log.Printf("error generating random number: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to run draw"})
+		return
+	}
+	winner := voters[n.Int64()]
 
 	// Record the draw result
 	if _, err := h.queries.RecordDrawResult(ctx, winner.ID); err != nil {
@@ -176,30 +182,4 @@ func (h *AdminHandler) RunDraw(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusSeeOther, "/admin")
-}
-
-// broadcastCurrentState sends the current vote state to all connected clients.
-func (h *AdminHandler) broadcastCurrentState() {
-	ctx := context.Background()
-	counts, err := h.queries.GetVoteCounts(ctx)
-	if err != nil {
-		return
-	}
-	total, err := h.queries.GetTotalVotes(ctx)
-	if err != nil {
-		return
-	}
-
-	photoCounts := make([]ws.PhotoCount, len(counts))
-	for i, c := range counts {
-		photoCounts[i] = ws.PhotoCount{
-			PhotoID:   c.PhotoID,
-			VoteCount: c.VoteCount,
-		}
-	}
-
-	h.hub.Broadcast(ws.VoteUpdate{
-		Counts: photoCounts,
-		Total:  total,
-	})
 }

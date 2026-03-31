@@ -1,7 +1,7 @@
 function initResultsWebSocket(photoCount) {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = protocol + '//' + window.location.host + '/ws/results';
-    const statusEl = document.getElementById('wsStatus');
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = protocol + "//" + window.location.host + "/ws/results";
+    const statusEl = document.getElementById("wsStatus");
 
     let ws;
     let reconnectDelay = 1000;
@@ -10,8 +10,8 @@ function initResultsWebSocket(photoCount) {
         ws = new WebSocket(wsUrl);
 
         ws.onopen = function () {
-            statusEl.textContent = '● Live';
-            statusEl.className = 'ws-status connected';
+            statusEl.textContent = "● Live";
+            statusEl.className = "ws-status connected";
             reconnectDelay = 1000;
         };
 
@@ -20,13 +20,13 @@ function initResultsWebSocket(photoCount) {
                 const data = JSON.parse(event.data);
                 updateResults(data);
             } catch (e) {
-                console.error('Failed to parse WebSocket message:', e);
+                console.error("Failed to parse WebSocket message:", e);
             }
         };
 
         ws.onclose = function () {
-            statusEl.textContent = '○ Reconnecting...';
-            statusEl.className = 'ws-status disconnected';
+            statusEl.textContent = "○ Reconnecting...";
+            statusEl.className = "ws-status disconnected";
             setTimeout(connect, reconnectDelay);
             reconnectDelay = Math.min(reconnectDelay * 2, 10000);
         };
@@ -38,7 +38,7 @@ function initResultsWebSocket(photoCount) {
 
     function updateResults(data) {
         const total = data.total || 0;
-        document.getElementById('totalVotes').textContent = total;
+        document.getElementById("totalVotes").textContent = total;
 
         // Build a map of photo_id -> count
         const countMap = {};
@@ -49,16 +49,16 @@ function initResultsWebSocket(photoCount) {
         }
 
         // Update each result row
-        document.querySelectorAll('.result-row').forEach(function (row) {
+        document.querySelectorAll(".result-row").forEach(function (row) {
             const photoId = row.dataset.photoId;
             const count = countMap[photoId] || 0;
-            const pct = total > 0 ? (count / total * 100) : 0;
+            const pct = total > 0 ? (count / total) * 100 : 0;
 
-            const bar = row.querySelector('.result-bar');
-            const countEl = row.querySelector('.count-value');
+            const bar = row.querySelector(".result-bar");
+            const countEl = row.querySelector(".count-value");
 
             if (bar) {
-                bar.style.width = pct + '%';
+                bar.style.width = pct + "%";
                 bar.dataset.count = count;
             }
             if (countEl) {

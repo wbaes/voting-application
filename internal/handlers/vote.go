@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
@@ -117,36 +116,6 @@ func (h *VoteHandler) broadcastUpdate(c *gin.Context) {
 	total, err := h.queries.GetTotalVotes(c.Request.Context())
 	if err != nil {
 		log.Printf("error getting total votes: %v", err)
-		return
-	}
-
-	photoCounts := make([]ws.PhotoCount, len(counts))
-	for i, c := range counts {
-		photoCounts[i] = ws.PhotoCount{
-			PhotoID:   c.PhotoID,
-			VoteCount: c.VoteCount,
-		}
-	}
-
-	h.hub.Broadcast(ws.VoteUpdate{
-		Counts: photoCounts,
-		Total:  total,
-	})
-}
-
-// BroadcastCurrentState sends the current vote state to all WS clients.
-// Useful after clearing votes.
-func (h *VoteHandler) BroadcastCurrentState(db *sql.DB) {
-	queries := dbsqlc.New(db)
-	counts, err := queries.GetVoteCounts(nil)
-	if err != nil {
-		log.Printf("error getting vote counts for broadcast: %v", err)
-		return
-	}
-
-	total, err := queries.GetTotalVotes(nil)
-	if err != nil {
-		log.Printf("error getting total votes for broadcast: %v", err)
 		return
 	}
 

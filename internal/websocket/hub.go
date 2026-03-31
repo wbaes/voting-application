@@ -10,7 +10,7 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
+	CheckOrigin: func(_ *http.Request) bool {
 		return true
 	},
 }
@@ -46,7 +46,7 @@ func (h *Hub) HandleConnection(w http.ResponseWriter, r *http.Request) {
 			h.mu.Lock()
 			delete(h.clients, conn)
 			h.mu.Unlock()
-			conn.Close()
+			_ = conn.Close()
 		}()
 		for {
 			if _, _, err := conn.ReadMessage(); err != nil {
@@ -83,7 +83,7 @@ func (h *Hub) Broadcast(update VoteUpdate) {
 	for conn := range h.clients {
 		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
 			log.Printf("websocket write error: %v", err)
-			conn.Close()
+			_ = conn.Close()
 			go func(c *websocket.Conn) {
 				h.mu.Lock()
 				delete(h.clients, c)

@@ -6,7 +6,10 @@
 
 <div class="admin-section">
     <h2>Vote Results</h2>
-    <p>Total votes: <strong>{{ .Total }}</strong> &nbsp;|&nbsp; Connected viewers: <strong>{{ .ConnectedClients }}</strong></p>
+    <p>
+        Total votes: <strong>{{ .Total }}</strong> &nbsp;|&nbsp; Connected viewers:
+        <strong>{{ .ConnectedClients }}</strong>
+    </p>
 
     <table class="admin-table">
         <thead>
@@ -32,17 +35,17 @@
     <h2>Prize Draw</h2>
     <p>Voters with contact details: <strong>{{ .VotersCount }}</strong></p>
 
-    <form method="POST" action="/admin/draw" onsubmit="return confirm('Run the prize draw? This will pick a random winner.')">
-        <button type="submit" class="btn btn-primary" {{ if eq .VotersCount 0 }}disabled{{ end }}>
-            🎲 Run Draw
-        </button>
+    <form
+        method="POST"
+        action="/admin/draw"
+        onsubmit="return confirm('Run the prize draw? This will pick a random winner.');"
+    >
+        <button type="submit" class="btn btn-primary" {{ if eq .VotersCount 0 }}disabled{{ end }}>🎲 Run Draw</button>
     </form>
 
     {{ if .DrawError }}
     <div class="error-message">{{ .DrawError }}</div>
-    {{ end }}
-
-    {{ if .DrawResults }}
+    {{ end }} {{ if .DrawResults }}
     <h3>Draw History</h3>
     <table class="admin-table">
         <thead>
@@ -73,7 +76,11 @@
 
 <div class="admin-section admin-danger">
     <h2>Danger Zone</h2>
-    <form method="POST" action="/admin/clear" onsubmit="return confirm('Are you sure? This will delete ALL votes and draw results permanently.')">
+    <form
+        method="POST"
+        action="/admin/clear"
+        onsubmit="return confirm('Are you sure? This will delete ALL votes and draw results permanently.');"
+    >
         <button type="submit" class="btn btn-danger">🗑️ Clear All Votes</button>
     </form>
 </div>
