@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  admin_password: "changeme"
+
+exhibition:
+  title: "Photo Exhibition 2026"
+  description: "Vote for your favourite photo!"
+
+photos:
+  - id: "photo1"
+    title: "Sunset Over the Lake"
+    file: "sunset.jpg"
+  - id: "photo2"
+    title: "Mountain Morning"
+    file: "mountain.jpg"

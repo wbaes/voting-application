@@ -1,0 +1,39 @@
+{{ template "header" . }}
+
+<header>
+    <h1>{{ .Exhibition.Title }}</h1>
+    <p class="subtitle">Live Results</p>
+</header>
+
+<div class="results-container">
+    <div class="total-votes">
+        Total votes: <span id="totalVotes">{{ .Total }}</span>
+    </div>
+
+    <div class="results-list" id="resultsList">
+        {{ range .Results }}
+        <div class="result-row" data-photo-id="{{ .ID }}">
+            <div class="result-photo">
+                <img src="/photos/{{ .File }}" alt="{{ .Title }}">
+            </div>
+            <div class="result-info">
+                <div class="result-title">{{ .Title }}</div>
+                <div class="result-bar-container">
+                    <div class="result-bar" data-count="{{ .VoteCount }}"
+                         style="width: {{ percentage .VoteCount $.Total }}%"></div>
+                </div>
+                <div class="result-count"><span class="count-value">{{ .VoteCount }}</span> votes</div>
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>
+
+<div class="ws-status" id="wsStatus">Connecting...</div>
+
+<script src="/static/js/results.js"></script>
+<script>
+    initResultsWebSocket({{ len .Photos }});
+</script>
+
+{{ template "footer" . }}

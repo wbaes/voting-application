@@ -1,0 +1,14 @@
+{{ template "header" . }}
+
+<header>
+    <h1>{{ .Exhibition.Title }}</h1>
+</header>
+
+<div class="voted-message">
+    <div class="check-icon">✓</div>
+    <h2>Thank you for voting!</h2>
+    <p>Your vote has been recorded.</p>
+    <a href="/results" class="btn btn-secondary">View Live Results →</a>
+</div>
+
+{{ template "footer" . }}

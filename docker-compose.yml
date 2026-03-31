@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - vote-data:/app/data
+      - ./photos:/app/photos:ro
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - DB_PATH=/app/data/votes.db
+      - GIN_MODE=release
+    restart: unless-stopped
+
+volumes:
+  vote-data:

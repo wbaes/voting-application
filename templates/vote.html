@@ -1,0 +1,115 @@
+{{ template "header" . }}
+
+<header>
+    <h1>{{ .Exhibition.Title }}</h1>
+    <p class="subtitle">{{ .Exhibition.Description }}</p>
+</header>
+
+{{ if .HasVoted }}
+<div class="voted-message">
+    <div class="check-icon">✓</div>
+    <h2>Thank you for voting!</h2>
+    <p>You voted for this photo. Your vote has been recorded.</p>
+    <a href="/results" class="btn btn-secondary">View Live Results →</a>
+</div>
+{{ else }}
+<div id="vote-section">
+    <p class="instruction">Tap a photo to select it, then confirm your vote below.</p>
+
+    <div class="photo-grid" id="photoGrid">
+        {{ range .Photos }}
+        <div class="photo-card" data-photo-id="{{ .ID }}" onclick="selectPhoto('{{ .ID }}')">
+            <div class="photo-img-wrapper">
+                <img src="/photos/{{ .File }}" alt="{{ .Title }}" loading="lazy">
+            </div>
+            <div class="photo-title">{{ .Title }}</div>
+        </div>
+        {{ end }}
+    </div>
+
+    <div id="voteForm" class="vote-form hidden">
+        <h2>Almost there!</h2>
+        <p>You selected: <strong id="selectedPhotoName"></strong></p>
+
+        <div class="contact-section">
+            <h3>Enter the draw <span class="optional">(optional)</span></h3>
+            <p class="contact-info">Leave your details to win your favourite photo!</p>
+            <div class="form-group">
+                <input type="text" id="voterName" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <input type="email" id="voterEmail" placeholder="Email address">
+            </div>
+            <div class="form-group">
+                <input type="tel" id="voterPhone" placeholder="Phone number">
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitVote()">Confirm Vote</button>
+    </div>
+</div>
+
+<div id="successMessage" class="hidden">
+    <div class="voted-message">
+        <div class="check-icon">✓</div>
+        <h2>Vote recorded!</h2>
+        <p>Thank you for participating.</p>
+        <a href="/results" class="btn btn-secondary">View Live Results →</a>
+    </div>
+</div>
+
+<div id="errorMessage" class="error-message hidden"></div>
+{{ end }}
+
+<script>
+let selectedPhotoId = null;
+const photoTitles = {};
+{{ range .Photos }}
+photoTitles["{{ .ID }}"] = "{{ .Title }}";
+{{ end }}
+
+function selectPhoto(id) {
+    selectedPhotoId = id;
+    document.querySelectorAll('.photo-card').forEach(card => {
+        card.classList.toggle('selected', card.dataset.photoId === id);
+    });
+    document.getElementById('voteForm').classList.remove('hidden');
+    document.getElementById('selectedPhotoName').textContent = photoTitles[id];
+    document.getElementById('voteForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function submitVote() {
+    if (!selectedPhotoId) return;
+
+    const body = {
+        photo_id: selectedPhotoId,
+        name: document.getElementById('voterName').value.trim(),
+        email: document.getElementById('voterEmail').value.trim(),
+        phone: document.getElementById('voterPhone').value.trim()
+    };
+
+    try {
+        const resp = await fetch('/api/vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (resp.ok) {
+            document.getElementById('vote-section').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+        } else {
+            const data = await resp.json();
+            const errEl = document.getElementById('errorMessage');
+            errEl.textContent = data.error || 'Something went wrong';
+            errEl.classList.remove('hidden');
+        }
+    } catch (err) {
+        const errEl = document.getElementById('errorMessage');
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.classList.remove('hidden');
+    }
+}
+</script>
+
+{{ template "footer" . }}
