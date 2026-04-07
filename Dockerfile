@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 RUN apk add --no-cache gcc musl-dev
 
@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o /server ./cmd/server/
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o /server 
 
 # Runtime stage
 FROM alpine:3.21
