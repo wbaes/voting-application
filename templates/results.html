@@ -12,13 +12,26 @@
         {{ range .Results }}
         <div class="result-row" data-photo-id="{{ .ID }}">
             <div class="result-photo">
-                <img src="/photos/{{ .File }}" alt="{{ .Title }}" />
+                <img
+                    src="/photos/{{ .File }}"
+                    alt="{{ .Title }}"
+                    {{
+                    if
+                    .Rotation
+                    }}style="transform: rotate({{ .Rotation }}deg)"
+                    {{
+                    end
+                    }}
+                />
             </div>
             <div class="result-info">
                 <div class="result-title">{{ .Title }}</div>
                 <div class="result-bar-container">
-                    <div class="result-bar" data-count="{{ .VoteCount }}"
-                        style="width: {{ percentage .VoteCount $.Total }}%"></div>
+                    <div
+                        class="result-bar"
+                        data-count="{{ .VoteCount }}"
+                        style="width: {{ percentage .VoteCount $.Total }}%"
+                    ></div>
                 </div>
                 <div class="result-count">
                     <span class="count-value">{{ printf "%.0f" (percentage .VoteCount $.Total) }}</span>%

@@ -24,9 +24,10 @@ type Exhibition struct {
 }
 
 type Photo struct {
-	ID    string `yaml:"id"`
-	Title string `yaml:"title"`
-	File  string `yaml:"file"`
+	ID       string `yaml:"id"`
+	Title    string `yaml:"title"`
+	File     string `yaml:"file"`
+	Rotation int    `yaml:"rotation"` // clockwise degrees: 0, 90, 180, 270
 }
 
 func Load(path string) (*Config, error) {
@@ -55,6 +56,15 @@ func Load(path string) (*Config, error) {
 
 	if len(cfg.Photos) == 0 {
 		return nil, fmt.Errorf("at least one photo must be configured")
+	}
+
+	for _, p := range cfg.Photos {
+		switch p.Rotation {
+		case 0, 90, 180, 270:
+			// valid
+		default:
+			return nil, fmt.Errorf("photo %q: rotation must be 0, 90, 180, or 270 (got %d)", p.ID, p.Rotation)
+		}
 	}
 
 	return &cfg, nil

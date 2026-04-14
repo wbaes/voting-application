@@ -5,9 +5,10 @@ A Go web application for exhibition visitors to vote for their favourite photo v
 ## Features
 
 - **Mobile-friendly voting page** — visitors scan a QR code and vote on their phone
+- **Multilingual UI** — language selector (🇬🇧 English, 🇳🇱 Dutch, 🇫🇷 French, 🇪🇸 Spanish) shown to every visitor
 - **Photo thumbnails** — configured via YAML, served as static files
 - **One vote per visitor** — cookie-based session tracking
-- **Live results page** — real-time updates via WebSocket
+- **Live results page** — real-time percentage updates via WebSocket
 - **Contact details collection** — optional, enters voters into a prize draw
 - **Prize draw** — randomly selects a winner from voters with contact details
 - **Admin dashboard** — password-protected, view results, run draws, clear votes
@@ -26,7 +27,6 @@ server:
 
 exhibition:
   title: "Photo Exhibition 2026"
-  description: "Vote for your favourite photo!"
 
 photos:
   - id: "photo1"
@@ -35,15 +35,19 @@ photos:
   - id: "photo2"
     title: "Mountain Morning"
     file: "mountain.jpg"
+    rotation: 90 # correct for stripped EXIF — 0, 90, 180, or 270
 ```
 
 ### 2. Add photo thumbnails
 
 Place your photo files in the `photos/` directory. The filenames must match the `file` field in your config. Recommended size: 800×600px JPEG for fast mobile loading.
 
+If your photos have been scaled down and lost their EXIF orientation metadata (i.e. portrait shots appear sideways), use the `rotation` field to manually correct the display. Valid values are `0` (default), `90`, `180`, and `270` (clockwise degrees). The server will reject any other value at startup.
+
 ### 3. Run with Docker Compose
 
 ```bash
+docker compose pull   # pull the latest image from ghcr.io
 docker compose up -d
 ```
 
@@ -61,6 +65,19 @@ Generate a QR code pointing to your server's public URL (e.g., `https://vote.you
 | `/results` | Live results with real-time updates  |
 | `/admin`   | Admin dashboard (password-protected) |
 
+## Language Support
+
+Visitors see a language selector at the top of every page. The selected language is stored in a cookie for the duration of their visit. Supported languages:
+
+| Code | Language   |
+| ---- | ---------- |
+| `en` | English    |
+| `nl` | Nederlands |
+| `fr` | Français   |
+| `es` | Español    |
+
+All voter-facing UI strings are translated. The admin dashboard is English-only.
+
 ## Admin
 
 Access `/admin` with:
@@ -74,11 +91,20 @@ From the admin dashboard you can:
 - Run the prize draw (picks a random voter who left contact details)
 - Clear all votes and draw results
 
+## CI/CD
+
+The repository includes a GitHub Actions workflow (`.github/workflows/docker.yml`) that:
+
+- **On every pull request** — builds the Docker image for `linux/amd64` and `linux/arm64` to verify the build
+- **On push to `main`** — builds and pushes a multi-arch image to the GitHub Container Registry as `ghcr.io/wbaes/voting-application:latest` (and `:<short-sha>`)
+
+No secrets need to be configured — the workflow uses the built-in `GITHUB_TOKEN`.
+
 ## Development
 
 ### Prerequisites
 
-- Go 1.25+
+- Go 1.22+
 - [sqlc](https://sqlc.dev/) (for regenerating database code)
 
 ### Run locally
@@ -112,9 +138,9 @@ sqlc generate
 
 1. Provision a VPS (CX22 or similar, ~€4/mo)
 2. Install Docker and Docker Compose
-3. Clone this repository
+3. Copy `docker-compose.yml` and `config.yaml` to the server (no need to clone the full repo)
 4. Edit `config.yaml` and add photos to `photos/`
-5. Run `docker compose up -d`
+5. Run `docker compose pull && docker compose up -d`
 6. Set up a reverse proxy (Caddy recommended) for HTTPS:
 
 ```bash
