@@ -10,7 +10,7 @@ function initResultsWebSocket(photoCount) {
         ws = new WebSocket(wsUrl);
 
         ws.onopen = function () {
-            statusEl.textContent = "● Live";
+            statusEl.textContent = statusEl.dataset.live || "● Live";
             statusEl.className = "ws-status connected";
             reconnectDelay = 1000;
         };
@@ -25,7 +25,8 @@ function initResultsWebSocket(photoCount) {
         };
 
         ws.onclose = function () {
-            statusEl.textContent = "○ Reconnecting...";
+            statusEl.textContent =
+                statusEl.dataset.reconnecting || "○ Reconnecting...";
             statusEl.className = "ws-status disconnected";
             setTimeout(connect, reconnectDelay);
             reconnectDelay = Math.min(reconnectDelay * 2, 10000);
@@ -62,7 +63,7 @@ function initResultsWebSocket(photoCount) {
                 bar.dataset.count = count;
             }
             if (countEl) {
-                countEl.textContent = count;
+                countEl.textContent = pct.toFixed(1);
             }
         });
     }

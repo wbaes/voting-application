@@ -6,9 +6,9 @@
 
 <div class="voted-message">
     <div class="check-icon">✓</div>
-    <h2>Thank you for voting!</h2>
-    <p>Your vote has been recorded.</p>
-    <a href="/results" class="btn btn-secondary">View Live Results →</a>
+    <h2>{{ call .T "thankyou_title" }}</h2>
+    <p>{{ call .T "thankyou_body" }}</p>
+    <a href="/results" class="btn btn-secondary">{{ call .T "view_results" }}</a>
 </div>
 
 {{ template "footer" . }}

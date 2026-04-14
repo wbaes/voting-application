@@ -1,6 +1,6 @@
 {{ define "header" }}
 <!doctype html>
-<html lang="en">
+<html lang="{{ if .Lang }}{{ .Lang }}{{ else }}en{{ end }}">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +8,20 @@
         <link rel="stylesheet" href="/static/css/style.css" />
     </head>
     <body>
-        <div class="container">{{ end }} {{ define "footer" }}</div>
+        <div class="container">
+            {{ if .Languages }}
+            <nav class="lang-selector" aria-label="Language">
+                {{ range .Languages }}
+                <a
+                    href="/lang?l={{ .Code }}&amp;return={{ $.CurrentPath }}"
+                    class="lang-btn{{ if eq $.Lang .Code }} active{{ end }}"
+                    aria-label="{{ .Name }}"
+                    >{{ .Flag }} <span class="lang-name">{{ .Name }}</span></a
+                >
+                {{ end }}
+            </nav>
+            {{ end }} {{ end }} {{ define "footer" }}
+        </div>
     </body>
 </html>
 {{ end }}

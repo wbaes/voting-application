@@ -32,12 +32,12 @@ func (h *VoteHandler) VotePage(c *gin.Context) {
 	existingVote, err := h.queries.GetVoteBySession(c.Request.Context(), sessionID)
 	hasVoted := err == nil && existingVote.ID != 0
 
-	c.HTML(http.StatusOK, "vote.html", gin.H{
-		"Exhibition": h.cfg.Exhibition,
-		"Photos":     h.cfg.Photos,
-		"HasVoted":   hasVoted,
-		"VotedFor":   existingVote.PhotoID,
-	})
+	data := baseTemplateData(c)
+	data["Exhibition"] = h.cfg.Exhibition
+	data["Photos"] = h.cfg.Photos
+	data["HasVoted"] = hasVoted
+	data["VotedFor"] = existingVote.PhotoID
+	c.HTML(http.StatusOK, "vote.html", data)
 }
 
 // SubmitVote handles the vote submission.
@@ -90,9 +90,9 @@ func (h *VoteHandler) SubmitVote(c *gin.Context) {
 
 // ThankYouPage renders a thank-you page after voting.
 func (h *VoteHandler) ThankYouPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "thankyou.html", gin.H{
-		"Exhibition": h.cfg.Exhibition,
-	})
+	data := baseTemplateData(c)
+	data["Exhibition"] = h.cfg.Exhibition
+	c.HTML(http.StatusOK, "thankyou.html", data)
 }
 
 func (h *VoteHandler) getOrCreateSession(c *gin.Context) string {

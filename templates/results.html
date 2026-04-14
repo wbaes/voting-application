@@ -2,11 +2,11 @@
 
 <header>
     <h1>{{ .Exhibition.Title }}</h1>
-    <p class="subtitle">Live Results</p>
+    <p class="subtitle">{{ call .T "live_results" }}</p>
 </header>
 
 <div class="results-container">
-    <div class="total-votes">Total votes: <span id="totalVotes">{{ .Total }}</span></div>
+    <div class="total-votes">{{ call .T "total_votes" }} <span id="totalVotes">{{ .Total }}</span></div>
 
     <div class="results-list" id="resultsList">
         {{ range .Results }}
@@ -17,24 +17,26 @@
             <div class="result-info">
                 <div class="result-title">{{ .Title }}</div>
                 <div class="result-bar-container">
-                    <div
-                        class="result-bar"
-                        data-count="{{ .VoteCount }}"
-                        style="width: {{ percentage .VoteCount $.Total }}%"
-                    ></div>
+                    <div class="result-bar" data-count="{{ .VoteCount }}"
+                        style="width: {{ percentage .VoteCount $.Total }}%"></div>
                 </div>
-                <div class="result-count"><span class="count-value">{{ .VoteCount }}</span> votes</div>
+                <div class="result-count">
+                    <span class="count-value">{{ printf "%.0f" (percentage .VoteCount $.Total) }}</span>%
+                </div>
             </div>
         </div>
         {{ end }}
     </div>
 </div>
 
-<div class="ws-status" id="wsStatus">Connecting...</div>
+{{ $wsLive := call .T "ws_live" }} {{ $wsReconnecting := call .T "ws_reconnecting" }}
+<div class="ws-status" id="wsStatus" data-live="{{ $wsLive }}" data-reconnecting="{{ $wsReconnecting }}">
+    {{ call .T "connecting" }}
+</div>
 
 <script src="/static/js/results.js"></script>
 <script>
-    initResultsWebSocket({{ len .Photos }});
+    initResultsWebSocket({{len .Photos}});
 </script>
 
 {{ template "footer" . }}

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -13,6 +15,7 @@ import (
 	"github.com/wouter/voting-with-draw/internal/config"
 	dbsqlc "github.com/wouter/voting-with-draw/internal/db/sqlc"
 	"github.com/wouter/voting-with-draw/internal/handlers"
+	"github.com/wouter/voting-with-draw/internal/i18n"
 	ws "github.com/wouter/voting-with-draw/internal/websocket"
 )
 
@@ -59,6 +62,16 @@ func run() error {
 	// Gin setup
 	r := gin.Default()
 
+	// Language middleware — reads voter_lang cookie and stores it in context.
+	r.Use(func(c *gin.Context) {
+		lang := i18n.EN
+		if cookie, err := c.Cookie("voter_lang"); err == nil {
+			lang = i18n.Parse(cookie)
+		}
+		c.Set("lang", lang)
+		c.Next()
+	})
+
 	// Custom template functions
 	r.SetFuncMap(template.FuncMap{
 		"percentage": func(count, total int64) float64 {
@@ -79,6 +92,17 @@ func run() error {
 	r.POST("/api/vote", voteHandler.SubmitVote)
 	r.GET("/results", resultsHandler.ResultsPage)
 	r.GET("/ws/results", resultsHandler.WebSocket)
+
+	// Language switcher — sets voter_lang cookie and redirects back.
+	r.GET("/lang", func(c *gin.Context) {
+		lang := i18n.Parse(c.Query("l"))
+		returnURL := c.Query("return")
+		if returnURL == "" || !strings.HasPrefix(returnURL, "/") {
+			returnURL = "/"
+		}
+		c.SetCookie("voter_lang", string(lang), 60*60*24*30, "/", "", false, false)
+		c.Redirect(http.StatusSeeOther, returnURL)
+	})
 
 	// Admin routes
 	admin := r.Group("/admin", adminHandler.AdminAuth())

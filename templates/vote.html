@@ -2,19 +2,19 @@
 
 <header>
     <h1>{{ .Exhibition.Title }}</h1>
-    <p class="subtitle">{{ .Exhibition.Description }}</p>
+    <p class="subtitle">{{ call .T "subtitle" }}</p>
 </header>
 
 {{ if .HasVoted }}
 <div class="voted-message">
     <div class="check-icon">✓</div>
-    <h2>Thank you for voting!</h2>
-    <p>You voted for this photo. Your vote has been recorded.</p>
-    <a href="/results" class="btn btn-secondary">View Live Results →</a>
+    <h2>{{ call .T "already_voted_title" }}</h2>
+    <p>{{ call .T "already_voted_body" }}</p>
+    <a href="/results" class="btn btn-secondary">{{ call .T "view_results" }}</a>
 </div>
 {{ else }}
 <div id="vote-section">
-    <p class="instruction">Tap a photo to select it, then confirm your vote below.</p>
+    <p class="instruction">{{ call .T "instruction" }}</p>
 
     <div class="photo-grid" id="photoGrid">
         {{ range .Photos }}
@@ -28,37 +28,40 @@
     </div>
 
     <div id="voteForm" class="vote-form hidden">
-        <h2>Almost there!</h2>
-        <p>You selected: <strong id="selectedPhotoName"></strong></p>
+        <h2>{{ call .T "almost_there" }}</h2>
+        <p>{{ call .T "you_selected" }} <strong id="selectedPhotoName"></strong></p>
 
         <div class="contact-section">
-            <h3>Enter the draw <span class="optional">(optional)</span></h3>
-            <p class="contact-info">Leave your details to win your favourite photo!</p>
+            {{ $namePH := call .T "name_placeholder" }} {{ $emailPH := call .T "email_placeholder" }} {{ $phonePH :=
+            call .T "phone_placeholder" }}
+            <h3>{{ call .T "enter_draw" }} <span class="optional">{{ call .T "optional" }}</span></h3>
+            <p class="contact-info">{{ call .T "enter_draw_desc" }}</p>
             <div class="form-group">
-                <input type="text" id="voterName" placeholder="Your name" />
+                <input type="text" id="voterName" placeholder="{{ $namePH }}" />
             </div>
             <div class="form-group">
-                <input type="email" id="voterEmail" placeholder="Email address" />
+                <input type="email" id="voterEmail" placeholder="{{ $emailPH }}" />
             </div>
             <div class="form-group">
-                <input type="tel" id="voterPhone" placeholder="Phone number" />
+                <input type="tel" id="voterPhone" placeholder="{{ $phonePH }}" />
             </div>
         </div>
 
-        <button class="btn btn-primary" onclick="submitVote()">Confirm Vote</button>
+        <button class="btn btn-primary" onclick="submitVote()">{{ call .T "confirm_vote" }}</button>
     </div>
 </div>
 
 <div id="successMessage" class="hidden">
     <div class="voted-message">
         <div class="check-icon">✓</div>
-        <h2>Vote recorded!</h2>
-        <p>Thank you for participating.</p>
-        <a href="/results" class="btn btn-secondary">View Live Results →</a>
+        <h2>{{ call .T "vote_recorded_title" }}</h2>
+        <p>{{ call .T "vote_recorded_body" }}</p>
+        <a href="/results" class="btn btn-secondary">{{ call .T "view_results" }}</a>
     </div>
 </div>
 
-<div id="errorMessage" class="error-message hidden"></div>
+{{ $networkError := call .T "network_error" }}
+<div id="errorMessage" class="error-message hidden" data-network-error="{{ $networkError }}"></div>
 {{ end }}
 
 <script>
@@ -75,6 +78,9 @@
             end;
         }
     }
+
+    const i18nNetworkError =
+        document.getElementById("errorMessage").dataset.networkError || "Network error. Please try again.";
 
     function selectPhoto(id) {
         selectedPhotoId = id;
@@ -114,7 +120,7 @@
             }
         } catch (err) {
             const errEl = document.getElementById("errorMessage");
-            errEl.textContent = "Network error. Please try again.";
+            errEl.textContent = i18nNetworkError;
             errEl.classList.remove("hidden");
         }
     }

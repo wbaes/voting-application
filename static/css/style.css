@@ -442,3 +442,54 @@ header h1 {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
 }
+
+/* === Language Selector === */
+.lang-selector {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    transition:
+        color 0.15s,
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.lang-btn:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+    border-color: var(--border);
+}
+
+.lang-btn.active {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border);
+    font-weight: 600;
+}
+
+@media (max-width: 400px) {
+    .lang-name {
+        display: none;
+    }
+
+    .lang-btn {
+        font-size: 1.1rem;
+        padding: 0.3rem 0.5rem;
+    }
+}

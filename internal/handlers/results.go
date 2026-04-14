@@ -56,12 +56,12 @@ func (h *ResultsHandler) ResultsPage(c *gin.Context) {
 		}
 	}
 
-	c.HTML(http.StatusOK, "results.html", gin.H{
-		"Exhibition": h.cfg.Exhibition,
-		"Results":    results,
-		"Total":      total,
-		"Photos":     h.cfg.Photos,
-	})
+	data := baseTemplateData(c)
+	data["Exhibition"] = h.cfg.Exhibition
+	data["Results"] = results
+	data["Total"] = total
+	data["Photos"] = h.cfg.Photos
+	c.HTML(http.StatusOK, "results.html", data)
 }
 
 // WebSocket handles the WebSocket connection for live results.
