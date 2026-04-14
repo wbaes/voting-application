@@ -78,7 +78,7 @@ From the admin dashboard you can:
 
 ### Prerequisites
 
-- Go 1.22+
+- Go 1.25+
 - [sqlc](https://sqlc.dev/) (for regenerating database code)
 
 ### Run locally
@@ -88,7 +88,7 @@ From the admin dashboard you can:
 mkdir -p data
 
 # Run the server
-go run ./cmd/server/
+go run main.go
 ```
 
 ### Regenerate sqlc code
