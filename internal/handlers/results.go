@@ -43,6 +43,7 @@ func (h *ResultsHandler) ResultsPage(c *gin.Context) {
 		ID        string
 		Title     string
 		File      string
+		Rotation  int
 		VoteCount int64
 	}
 
@@ -52,6 +53,7 @@ func (h *ResultsHandler) ResultsPage(c *gin.Context) {
 			ID:        p.ID,
 			Title:     p.Title,
 			File:      p.File,
+			Rotation:  p.Rotation,
 			VoteCount: countMap[p.ID],
 		}
 	}

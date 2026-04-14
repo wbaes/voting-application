@@ -20,7 +20,18 @@
         {{ range .Photos }}
         <div class="photo-card" data-photo-id="{{ .ID }}" onclick="selectPhoto('{{ .ID }}')">
             <div class="photo-img-wrapper">
-                <img src="/photos/{{ .File }}" alt="{{ .Title }}" loading="lazy" />
+                <img
+                    src="/photos/{{ .File }}"
+                    alt="{{ .Title }}"
+                    loading="lazy"
+                    {{
+                    if
+                    .Rotation
+                    }}style="transform: rotate({{ .Rotation }}deg)"
+                    {{
+                    end
+                    }}
+                />
             </div>
             <div class="photo-title">{{ .Title }}</div>
         </div>
