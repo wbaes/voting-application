@@ -85,13 +85,12 @@ func (h *AdminHandler) AdminPage(c *gin.Context) {
 
 	// Enrich draw results with photo titles
 	type DrawResultDisplay struct {
-		ID        int64
-		Name      string
-		Email     string
-		Phone     string
-		PhotoID   string
+		ID         int64
+		Name       string
+		Email      string
+		PhotoID    string
 		PhotoTitle string
-		DrawnAt   string
+		DrawnAt    string
 	}
 
 	drawDisplay := make([]DrawResultDisplay, len(drawResults))
@@ -104,7 +103,6 @@ func (h *AdminHandler) AdminPage(c *gin.Context) {
 			ID:         dr.ID,
 			Name:       dr.Name,
 			Email:      dr.Email,
-			Phone:      dr.Phone,
 			PhotoID:    dr.PhotoID,
 			PhotoTitle: photoTitle,
 			DrawnAt:    dr.DrawnAt.Format("2006-01-02 15:04:05"),

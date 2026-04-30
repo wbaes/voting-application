@@ -2,6 +2,9 @@
 
 <header>
     <h1>{{ .Exhibition.Title }}</h1>
+    {{ if .Exhibition.Subtitle }}
+    <p class="subtitle">{{ .Exhibition.Subtitle }}</p>
+    {{ end }}
 </header>
 
 <div class="voted-message">

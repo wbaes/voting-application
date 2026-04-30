@@ -40,15 +40,12 @@ func (h *VoteHandler) VotePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "vote.html", data)
 }
 
-// SubmitVote handles the vote submission.
+// SubmitVote handles the vote submission (vote only, no contact details).
 func (h *VoteHandler) SubmitVote(c *gin.Context) {
 	sessionID := h.getOrCreateSession(c)
 
 	var req struct {
 		PhotoID string `json:"photo_id" binding:"required"`
-		Name    string `json:"name"`
-		Email   string `json:"email"`
-		Phone   string `json:"phone"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -57,7 +54,8 @@ func (h *VoteHandler) SubmitVote(c *gin.Context) {
 	}
 
 	// Validate photo_id exists in config
-	if h.cfg.PhotoByID(req.PhotoID) == nil {
+	photo := h.cfg.PhotoByID(req.PhotoID)
+	if photo == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid photo"})
 		return
 	}
@@ -68,13 +66,15 @@ func (h *VoteHandler) SubmitVote(c *gin.Context) {
 		return
 	}
 
+	// Generate a contact token so the client can update contact details
+	// even if cookies are disabled.
+	contactToken := uuid.New().String()
+
 	// Cast vote
-	_, err := h.queries.CastVote(c.Request.Context(), dbsqlc.CastVoteParams{
-		PhotoID:   req.PhotoID,
-		SessionID: sessionID,
-		Name:      req.Name,
-		Email:     req.Email,
-		Phone:     req.Phone,
+	vote, err := h.queries.CastVote(c.Request.Context(), dbsqlc.CastVoteParams{
+		PhotoID:      req.PhotoID,
+		SessionID:    sessionID,
+		ContactToken: contactToken,
 	})
 	if err != nil {
 		log.Printf("error casting vote: %v", err)
@@ -84,6 +84,46 @@ func (h *VoteHandler) SubmitVote(c *gin.Context) {
 
 	// Broadcast updated counts
 	h.broadcastUpdate(c)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":     true,
+		"vote_id":     vote.ID,
+		"token":       contactToken,
+		"photo_title": photo.Title,
+	})
+}
+
+// UpdateContact updates the contact details for an existing vote.
+func (h *VoteHandler) UpdateContact(c *gin.Context) {
+	var req struct {
+		VoteID int64  `json:"vote_id" binding:"required"`
+		Token  string `json:"token" binding:"required"`
+		Name   string `json:"name"`
+		Email  string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	result, err := h.queries.UpdateVoteContact(c.Request.Context(), dbsqlc.UpdateVoteContactParams{
+		Name:         req.Name,
+		Email:        req.Email,
+		ID:           req.VoteID,
+		ContactToken: req.Token,
+	})
+	if err != nil {
+		log.Printf("error updating contact: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save details"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Vote not found"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }

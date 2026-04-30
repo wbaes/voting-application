@@ -2,7 +2,9 @@
 
 <header>
     <h1>{{ .Exhibition.Title }}</h1>
-    <p class="subtitle">{{ call .T "subtitle" }}</p>
+    {{ if .Exhibition.Subtitle }}
+    <p class="subtitle">{{ .Exhibition.Subtitle }}</p>
+    {{ end }}
 </header>
 
 {{ if .HasVoted }}
@@ -41,10 +43,18 @@
     <div id="voteForm" class="vote-form hidden">
         <h2>{{ call .T "almost_there" }}</h2>
         <p>{{ call .T "you_selected" }} <strong id="selectedPhotoName"></strong></p>
+        <button class="btn btn-primary" id="confirmVoteBtn" onclick="submitVote()">{{ call .T "confirm_vote" }}</button>
+    </div>
+</div>
 
-        <div class="contact-section">
-            {{ $namePH := call .T "name_placeholder" }} {{ $emailPH := call .T "email_placeholder" }} {{ $phonePH :=
-            call .T "phone_placeholder" }}
+<div id="successMessage" class="hidden">
+    <div class="voted-message">
+        <div class="check-icon">✓</div>
+        <h2>{{ call .T "vote_recorded_title" }}</h2>
+        <p>{{ call .T "you_selected" }} <strong id="votedPhotoName"></strong></p>
+
+        <div class="contact-section" id="contactSection">
+            {{ $namePH := call .T "name_placeholder" }} {{ $emailPH := call .T "email_placeholder" }}
             <h3>{{ call .T "enter_draw" }} <span class="optional">{{ call .T "optional" }}</span></h3>
             <p class="contact-info">{{ call .T "enter_draw_desc" }}</p>
             <div class="form-group">
@@ -53,20 +63,15 @@
             <div class="form-group">
                 <input type="email" id="voterEmail" placeholder="{{ $emailPH }}" />
             </div>
-            <div class="form-group">
-                <input type="tel" id="voterPhone" placeholder="{{ $phonePH }}" />
-            </div>
+            <button class="btn btn-primary" id="submitDetailsBtn" onclick="submitContact()">
+                {{ call .T "submit_details" }}
+            </button>
         </div>
 
-        <button class="btn btn-primary" onclick="submitVote()">{{ call .T "confirm_vote" }}</button>
-    </div>
-</div>
+        <div id="contactSaved" class="hidden">
+            <p class="contact-saved">{{ call .T "details_saved" }}</p>
+        </div>
 
-<div id="successMessage" class="hidden">
-    <div class="voted-message">
-        <div class="check-icon">✓</div>
-        <h2>{{ call .T "vote_recorded_title" }}</h2>
-        <p>{{ call .T "vote_recorded_body" }}</p>
         <a href="/results" class="btn btn-secondary">{{ call .T "view_results" }}</a>
     </div>
 </div>
@@ -77,6 +82,8 @@
 
 <script>
     let selectedPhotoId = null;
+    let voteId = null;
+    let voteToken = null;
     const photoTitles = {};
     {
         {
@@ -106,12 +113,10 @@
     async function submitVote() {
         if (!selectedPhotoId) return;
 
-        const body = {
-            photo_id: selectedPhotoId,
-            name: document.getElementById("voterName").value.trim(),
-            email: document.getElementById("voterEmail").value.trim(),
-            phone: document.getElementById("voterPhone").value.trim(),
-        };
+        const btn = document.getElementById("confirmVoteBtn");
+        btn.disabled = true;
+
+        const body = { photo_id: selectedPhotoId };
 
         try {
             const resp = await fetch("/api/vote", {
@@ -121,15 +126,59 @@
             });
 
             if (resp.ok) {
+                const data = await resp.json();
+                voteId = data.vote_id;
+                voteToken = data.token;
+                document.getElementById("votedPhotoName").textContent = data.photo_title;
                 document.getElementById("vote-section").classList.add("hidden");
                 document.getElementById("successMessage").classList.remove("hidden");
             } else {
+                btn.disabled = false;
                 const data = await resp.json();
                 const errEl = document.getElementById("errorMessage");
                 errEl.textContent = data.error || "Something went wrong";
                 errEl.classList.remove("hidden");
             }
         } catch (err) {
+            btn.disabled = false;
+            const errEl = document.getElementById("errorMessage");
+            errEl.textContent = i18nNetworkError;
+            errEl.classList.remove("hidden");
+        }
+    }
+
+    async function submitContact() {
+        if (!voteId || !voteToken) return;
+
+        const btn = document.getElementById("submitDetailsBtn");
+        btn.disabled = true;
+
+        const body = {
+            vote_id: voteId,
+            token: voteToken,
+            name: document.getElementById("voterName").value.trim(),
+            email: document.getElementById("voterEmail").value.trim(),
+        };
+
+        try {
+            const resp = await fetch("/api/vote/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+            });
+
+            if (resp.ok) {
+                document.getElementById("contactSection").classList.add("hidden");
+                document.getElementById("contactSaved").classList.remove("hidden");
+            } else {
+                btn.disabled = false;
+                const data = await resp.json();
+                const errEl = document.getElementById("errorMessage");
+                errEl.textContent = data.error || "Something went wrong";
+                errEl.classList.remove("hidden");
+            }
+        } catch (err) {
+            btn.disabled = false;
             const errEl = document.getElementById("errorMessage");
             errEl.textContent = i18nNetworkError;
             errEl.classList.remove("hidden");

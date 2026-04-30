@@ -3,13 +3,22 @@ server:
   admin_password: "changeme"
 
 exhibition:
-  title: "Photo Exhibition 2026"
+  title: "Wildlife"
+  subtitle: "Light - Dark"
   description: "Vote for your favourite photo!"
 
 photos:
   - id: "photo1"
-    title: "Sunset Over the Lake"
-    file: "sunset.jpg"
+    title: "Sans Soucis"
+    file: "dsc_4080_1.jpg"
   - id: "photo2"
-    title: "Mountain Morning"
-    file: "mountain.jpg"
+    title: "Ping Pong"
+    file: "dsc_4119.jpg"
+    rotation: 270
+  - id: "photo3"
+    title: "Umbrella"
+    file: "dsc_4095_1.jpg"
+  - id: "photo4"
+    title: "Walking Away"
+    file: "dsc_4158.jpg"
+    rotation: 270

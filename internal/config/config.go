@@ -20,6 +20,7 @@ type ServerConfig struct {
 
 type Exhibition struct {
 	Title       string `yaml:"title"`
+	Subtitle    string `yaml:"subtitle"`
 	Description string `yaml:"description"`
 }
 
@@ -56,6 +57,14 @@ func Load(path string) (*Config, error) {
 
 	if len(cfg.Photos) == 0 {
 		return nil, fmt.Errorf("at least one photo must be configured")
+	}
+
+	seen := make(map[string]bool)
+	for _, p := range cfg.Photos {
+		if seen[p.ID] {
+			return nil, fmt.Errorf("duplicate photo ID %q", p.ID)
+		}
+		seen[p.ID] = true
 	}
 
 	for _, p := range cfg.Photos {

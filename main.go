@@ -90,6 +90,7 @@ func run() error {
 	r.GET("/", voteHandler.VotePage)
 	r.GET("/thankyou", voteHandler.ThankYouPage)
 	r.POST("/api/vote", voteHandler.SubmitVote)
+	r.POST("/api/vote/contact", voteHandler.UpdateContact)
 	r.GET("/results", resultsHandler.ResultsPage)
 	r.GET("/ws/results", resultsHandler.WebSocket)
 
@@ -127,6 +128,10 @@ func runMigrations(db *sql.DB) error {
 	if _, err := db.Exec(string(migration)); err != nil {
 		return fmt.Errorf("running migration: %w", err)
 	}
+
+	// Add contact_token column for existing databases (safe to ignore if already present)
+	_, _ = db.Exec("ALTER TABLE votes ADD COLUMN contact_token TEXT NOT NULL DEFAULT ''")
+
 	log.Println("Database migrations applied")
 	return nil
 }

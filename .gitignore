@@ -22,3 +22,9 @@ photos/*.jpeg
 photos/*.png
 photos/*.gif
 photos/*.webp
+
+# Shared agent plugins (auto-installed, do not edit)
+.agent-plugins/
+.agents/skills/
+.github/instructions/_shared.*
+.cursor/commands/_shared.*
