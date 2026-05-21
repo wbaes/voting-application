@@ -20,7 +20,12 @@
 
     <div class="photo-grid" id="photoGrid">
         {{ range .Photos }}
-        <div class="photo-card" data-photo-id="{{ .ID }}" onclick="selectPhoto('{{ .ID }}')">
+        <div
+            class="photo-card"
+            data-photo-id="{{ .ID }}"
+            data-photo-title="{{ .Title }}"
+            onclick="selectPhoto('{{ .ID }}')"
+        >
             <div class="photo-img-wrapper">
                 <img
                     src="/photos/{{ .File }}"
@@ -84,18 +89,6 @@
     let selectedPhotoId = null;
     let voteId = null;
     let voteToken = null;
-    const photoTitles = {};
-    {
-        {
-            range.Photos;
-        }
-    }
-    photoTitles["{{ .ID }}"] = "{{ .Title }}";
-    {
-        {
-            end;
-        }
-    }
 
     const i18nNetworkError =
         document.getElementById("errorMessage").dataset.networkError || "Network error. Please try again.";
@@ -106,7 +99,8 @@
             card.classList.toggle("selected", card.dataset.photoId === id);
         });
         document.getElementById("voteForm").classList.remove("hidden");
-        document.getElementById("selectedPhotoName").textContent = photoTitles[id];
+        const card = document.querySelector(`.photo-card[data-photo-id="${id}"]`);
+        document.getElementById("selectedPhotoName").textContent = card ? card.dataset.photoTitle : "";
         document.getElementById("voteForm").scrollIntoView({ behavior: "smooth" });
     }
 
