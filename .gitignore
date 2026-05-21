@@ -1,5 +1,6 @@
 # Binary
 server
+voting-with-draw
 
 # Database
 data/*.db
